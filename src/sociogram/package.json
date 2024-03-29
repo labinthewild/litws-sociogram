@@ -1,0 +1,35 @@
+{
+  "name": "litws-sociogram",
+  "version": "0.1.0",
+  "author": "The LabintheWild Team",
+  "license": "MIT",
+  "homepage": "https://github.com/labinthewild/litws-sociogram",
+  "description": "This is an implementation of the Sociogram study.",
+  "dependencies": {
+    "alpaca": "^1.5.27",
+    "bootstrap": "^4.6.2",
+    "expose-loader": "^4.1.0",
+    "handlebars": "^4.7.8",
+    "handlebars-loader": "^1.7.3",
+    "jquery": "3.7.1",
+    "jquery-ui-bundle": "^1.12.1",
+    "lodash": "^4.17.21",
+    "popper.js": "^1.16.1",
+    "webpack": "^5.91.0",
+    "webpack-dev-server": "^4.15.2",
+    "p5": "^1.9.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "develop": "webpack --watch",
+    "devserver": "webpack serve --config webpack.config.js --mode development --static-directory .."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:labinthewild/litws-sociogram.git"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
+}
