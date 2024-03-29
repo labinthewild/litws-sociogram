@@ -19,7 +19,7 @@ var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("../templates/demographics.html");
 var instructionsTemplate = require("../templates/instructions.html");
 var loadingTemplate = require("../templates/loading.html");
-var resultsTemplate = require("../templates/results.html");
+var resultsTemplate = require("./pages/results.html");
 var resultsFooter = require("../templates/results-footer.html");
 var commentsTemplate = require("../templates/comments.html");
 var sociogramTemplate = require("./pages/sociogram.html");
@@ -33,6 +33,15 @@ module.exports = (function(exports) {
 	var timeline = [],
 	params = {
 		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
+		sociogram: {
+			TEST: 'DATA',
+			canvas_size: {},
+			people: [
+				{x: 281.5, y: 152.234375, radius: 75, name: 'ME'},
+				{x: 639.5, y: 354.234375, radius: 67.5, name: 'YOU'},
+				{x: 278.5, y: 431.234375, radius: 27.5, name: 'THEM'}
+			]
+		},
 		study_recommendation: [],
 		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
 		slides: {
@@ -104,8 +113,16 @@ module.exports = (function(exports) {
 	}
 
 	function calculateResults() {
-		//TODO: Nothing to calculate
 		let results_data = {}
+		let accumulator = 0;
+		for (let person of params.sociogram.people) {
+			if(person.name === 'ME') {
+				results_data.self = Math.round(person.radius)
+			} else {
+				accumulator += person.radius
+			}
+		}
+		results_data.others = Math.round(accumulator/(params.sociogram.people.length-1));
 		showResults(results_data, true)
 	}
 
