@@ -8,10 +8,25 @@ import p5 from 'p5';
 window.p5 = p5;
 
 let DIV_NAME = null;
+let bubbles = [];
 
-export default (div_name) => {
+let sociogram = (div_name) => {
   DIV_NAME = div_name;
-  new p5(sociogram);
+  new p5(sociogram_canvas);
+}
+
+let sociogram_results = () => {
+  let result = {
+    canvas_size: {
+      width: document.getElementById(DIV_NAME).clientWidth,
+      height: document.getElementById(DIV_NAME).clientHeight,
+    },
+    people: []
+  }
+  for (let bubble of bubbles) {
+    result.people.push(bubble.export())
+  }
+  return result;
 }
 
 // TODO: Could not easily import the library from NPM because it depends on a 'p5' unexistent variable!
@@ -19,9 +34,7 @@ export default (div_name) => {
 // import 'p5.collide2d';
 
 //NEAT SOLUTION: https://github.com/processing/p5.js/wiki/p5.js-overview#instantiation--namespace
-const sociogram = (p5) => {
-  //TODO: Bad approach... need to find a way to pass it as an argument!
-  // const DIV_NAME = 'sociogram-drawing';
+const sociogram_canvas = (p5) => {
   const CANVAS_ELEM = document.getElementById(DIV_NAME);
   const CANVAS_INITIAL_POSITION = {
     x: CANVAS_ELEM.getBoundingClientRect().x,
@@ -33,7 +46,6 @@ const sociogram = (p5) => {
   const SELECT_COLOR = p5.color('red');
   const BUBBLE_MAX_SIZE = 150;
   const MOUSE_SENSITIVITY = CANVAS_SIZE/100;
-  let bubbles = [];
   let delButton = new DeleteButton();
 
   p5.setup = () => {
@@ -211,5 +223,15 @@ const sociogram = (p5) => {
       this.name.remove();
     }
 
+    export() {
+      return {
+        x: this.x,
+        y: this.y,
+        radius: this.w/2,
+        name: this.name.value()
+      }
+    }
   }
 }
+
+export {sociogram, sociogram_results};

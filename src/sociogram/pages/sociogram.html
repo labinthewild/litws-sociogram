@@ -1,17 +1,28 @@
 <!-- Template for instructions page -->
 
 <link href="./css/sociogram.css" rel="stylesheet" type="text/css">
-
-<h2 class="bolded-blue" data-i18n="study-socio-instruct-header"></h2>
 <div class="instructions-stim-container text">
-    <p data-i18n="study-socio-instruct-p1"></p>
-    <p data-i18n="study-socio-instruct-p2"></p>
-    <p data-i18n="study-socio-instruct-p3"></p>
+    <h2 class="bolded-blue" data-i18n="study-socio-instruct-header"></h2>
+    <div class="text-start">
+        <p data-i18n="study-socio-instruct-p1"></p>
+        <p data-i18n="study-socio-instruct-p2"></p>
+        <p data-i18n="study-socio-instruct-p3"></p>
+    </div>
+    <button type="button" class="btn btn-lg btn-primary mb-4" onclick="wrap_up()" data-i18n="study-socio-button-done"></button>
 </div>
 
 <div id="sociogram-drawing" class="border border-primary"></div>
 
-<script type="module">
+<script type="text/javascript">
+    let wrap_up = () => {
+        LITW.study.sociogram_save();
+        let input_elements = document.getElementsByTagName('input');
+        while(input_elements[0]) {
+            input_elements[0].remove();
+        }
+        $('#btn-next-page').click();
+    }
+
     $(document).ready(function() {
         LITW.study.sociogram('sociogram-drawing');
     });

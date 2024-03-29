@@ -26,7 +26,7 @@ var sociogramTemplate = require("./pages/sociogram.html");
 require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 
-import sociogram from "./js/sociogram.mjs";
+import {sociogram, sociogram_results} from "./js/sociogram.mjs";
 
 //TODO: document "params.study_id" when updating the docs/7-ManageData!!!
 module.exports = (function(exports) {
@@ -64,7 +64,8 @@ module.exports = (function(exports) {
 				type: "display-slide",
 				template: sociogramTemplate,
 				display_element: $("#sociogram"),
-				name: "sociogram"
+				name: "sociogram",
+				display_next_button: false
 			},
 			COMMENTS: {
 				type: "display-slide",
@@ -96,6 +97,10 @@ module.exports = (function(exports) {
 		timeline.push(params.slides.SOCIOGRAM);
 		// timeline.push(params.slides.COMMENTS);
 		timeline.push(params.slides.RESULTS);
+	}
+
+	function saveSociogramResults() {
+		params.sociogram = sociogram_results();
 	}
 
 	function calculateResults() {
@@ -209,6 +214,7 @@ module.exports = (function(exports) {
 	exports.study = {};
 	exports.study.params = params;
 	exports.study.sociogram = sociogram;
+	exports.study.sociogram_save = saveSociogramResults;
 
 })( window.LITW = window.LITW || {} );
 

@@ -107,5 +107,6 @@
   "study-socio-instruct-header": "What does your social network look like?",
   "study-socio-instruct-p1": "Please click anywhere in the canvas below to draw a circle for 8-10 people in your social network, such as family members, friends, co-workers, and yourself.",
   "study-socio-instruct-p2": "Click on the canvas to ADD a person represented by a circle. You can CHANGE the size of the circle by clicking on it and dragging up and down.",
-  "study-socio-instruct-p3": "Below the circle, please type in who the circle represents. At least one of the circles has to be 'ME'!"
+  "study-socio-instruct-p3": "Below the circle, please type in who the circle represents. At least one of the circles has to be 'ME'!",
+  "study-socio-button-done": "I'm done"
 }
