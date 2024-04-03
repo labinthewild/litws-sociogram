@@ -44,18 +44,24 @@ const sociogram_canvas = (p5) => {
   const CANVAS_COLOR = p5.color('white');
   const DEFAULT_COLOR = p5.color('darkgray');
   const SELECT_COLOR = p5.color('red');
-  const BUBBLE_MAX_SIZE = 150;
-  const MOUSE_SENSITIVITY = CANVAS_SIZE/100;
+  const BUBBLE_MAX_SIZE = CANVAS_SIZE/4;
+  const BUBBLE_MIN_SIZE = CANVAS_SIZE/20;
   let delButton = new DeleteButton();
+  let tempBubble = null;
 
   p5.setup = () => {
-    let canvas = p5.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+    let canvas = p5.createCanvas(CANVAS_SIZE, window.innerHeight);
     canvas.mousePressed(mousePressed);
+    canvas.mouseMoved(mouseMoved);
+    canvas.mouseReleased(mouseReleased);
     canvas.parent(DIV_NAME);
   }
 
   p5.draw = () => {
     p5.background(CANVAS_COLOR);
+    if(tempBubble){
+      tempBubble.draw();
+    }
     let current_selection = null;
     for(let i=0; i<bubbles.length; i++) {
       let bub = bubbles[i];
@@ -69,13 +75,30 @@ const sociogram_canvas = (p5) => {
     delButton.draw();
   }
 
+  let mouseReleased = () => {
+    if(tempBubble) {
+      tempBubble.finalize();
+      bubbles.push(tempBubble);
+      tempBubble = null;
+    }
+  }
   let mousePressed = () => {
     if(delButton.isMouseOver()) {
       delButton.click();
     } else {
-      if(!isOverBubble()) {
-        bubbles.push(new Bubble(p5.mouseX, p5.mouseY));
+      if (!tempBubble) {
+        tempBubble = new Bubble(p5.mouseX, p5.mouseY);
       }
+    }
+  }
+
+  let mouseMoved = () => {
+    if (tempBubble) {
+      let dist = Math.sqrt(
+          Math.pow(tempBubble.getX()-p5.mouseX, 2)+
+          Math.pow(tempBubble.getY()-p5.mouseY, 2)
+      )
+      tempBubble.setRadius(dist);
     }
   }
 
@@ -122,7 +145,7 @@ const sociogram_canvas = (p5) => {
       this.y = 0;
       this.icon = p5.loadImage('./img/trash3.svg');
       this.target = null;
-      this.size = BUBBLE_MAX_SIZE/10;
+      this.size = 150;
     }
 
     setPosition(x, y) {
@@ -132,7 +155,7 @@ const sociogram_canvas = (p5) => {
 
     draw() {
       if(this.target != null) {
-        p5.image(this.icon, this.x, this.y, this.size, this.size);
+        p5.image(this.icon, this.x, this.y);
       }
     }
 
@@ -158,10 +181,8 @@ const sociogram_canvas = (p5) => {
     constructor(centerX, centerY) {
       this.x = centerX;
       this.y = centerY;
-      this.w = BUBBLE_MAX_SIZE/2;
-      this.MAX_W = BUBBLE_MAX_SIZE;
-      this.MIN_W = BUBBLE_MAX_SIZE/3;
-      this.INC = 5;
+      this.w = BUBBLE_MIN_SIZE;
+      this.temporary = true;
       this.name = p5.createInput();
       this.name.position(
           adjustXForCanvasPosition(this.x-(this.name.width/2)),
@@ -170,28 +191,24 @@ const sociogram_canvas = (p5) => {
     }
 
     draw(){
-      if(this.isMouseOverBubble() || this.isMouseOverLable()){
+      if(this.temporary){
         p5.stroke(SELECT_COLOR);
         p5.fill(SELECT_COLOR);
-
-        if(this.isMouseOverBubble() && !this.isMouseOverLable() && p5.mouseIsPressed){
-          let diff = p5.mouseY-this.y;
-          if(Math.abs(diff)>MOUSE_SENSITIVITY) {
-            if(diff<0 && this.w<this.MAX_W) {
-              this.w+=this.INC;
-            }
-            if(diff>0 && this.w>this.MIN_W) {
-              this.w-=this.INC;
-            }
-          }
-        }
       } else {
+        if(this.isMouseOverBubble() || this.isMouseOverLable()){
+          p5.stroke(SELECT_COLOR);
+          p5.fill(SELECT_COLOR);
+        } else {
           p5.stroke(DEFAULT_COLOR);
           p5.fill(DEFAULT_COLOR);
+        }
       }
       p5.ellipse(this.x, this.y, this.w);
     }
 
+    finalize() {
+      this.temporary = false;
+    }
     getX() {
       return this.x;
     }
@@ -204,6 +221,12 @@ const sociogram_canvas = (p5) => {
       return this.w/2;
     }
 
+    setRadius(tentativeLength) {
+      let length = tentativeLength*2;
+      if(length>=BUBBLE_MIN_SIZE && length<=BUBBLE_MAX_SIZE) {
+        this.w = length;
+      }
+    }
 
     isMouseOverBubble(){
       return p5.collidePointCircle(p5.mouseX, p5.mouseY, this.x, this.y, this.w);
