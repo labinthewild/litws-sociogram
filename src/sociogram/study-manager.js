@@ -41,7 +41,7 @@ import * as socio_results from "./js/sociogram-results.mjs";
 module.exports = (function(exports) {
 	var timeline = [],
 	params = {
-		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
+		study_id: "1783e5ff-3c49-458d-8806-196bbfac52a3",
 		sociogram: {
 			TEST: 'DATA',
 			canvas_size: {},
