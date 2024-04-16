@@ -1,5 +1,6 @@
 <!-- Template for the results page -->
-<h3 class="bolded-blue" style="text-align: center" data-i18n="litw-results-header"></h3>
+<div id="participant_results" data-self="{{ data.self }}" data-others="{{ data.others }}"></div>
+<h3 class="bolded-blue" style="text-align: center">{{ data.result_msg }}</h3>
 
 <br>
 {{#if data.code}}
@@ -11,15 +12,32 @@
 {{/if}}
 <br>
 
-<div class="container text-center">
-    <span>Your circler was drawn with a radius of {{ data.self }} while the others had an average of {{ data.others }}!</span>
+<div id="results-main" class="container text-center">
+    <div id="results-explain">
+        <p data-i18n="study-socio-results-exp-p1"></p>
+        <p data-i18n="study-socio-results-exp-p2"></p>
+    </div>
+    <div id="results-graph"></div>
 </div>
 
 <br>
 <div id="results-footer"></div>
 
+
 <script type="text/javascript">
+    let draw_results = () => {
+        let results_data = document.getElementById('participant_results').dataset;
+        let US_FACTOR = 0.8; //TODO: try to calculate this in px2mm! (should be 6mm)
+        let JP_FACTOR = 1.1; //TODO: try to calculate this in px2mm! (should be 6mm)
+        LITW.study.sociogram_results_draw([
+            {radius: results_data.self, label: $.i18n('study-socio-results-self')},
+            {radius: results_data.others, label: $.i18n('study-socio-results-others-you')},
+            {radius: results_data.self*US_FACTOR, label: $.i18n('study-socio-results-others-US')},
+            {radius: results_data.self*JP_FACTOR, label: $.i18n('study-socio-results-others-JP')},
+        ], $.i18n('study-socio-results-others'));
+    }
     $(document).ready(function() {
-        //TODO: trigger post-loading functions?
+        LITW.study.sociogram_results('results-graph');
+        draw_results();
     });
 </script>

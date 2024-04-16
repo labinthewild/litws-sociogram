@@ -10,10 +10,18 @@
  *************************************************************/
 
 // load webpack modules
-window.$ = window.jQuery = require("jquery");
-window.bootstrap = require("bootstrap");
+// import $ from "jquery";
+window.$ = require("jquery");
+window.jQuery = $;
+require("../js/jquery.i18n");
+require("../js/jquery.i18n.messagestore");
 require("jquery-ui-bundle");
+require("handlebars");
+window.$.alpaca = require("alpaca");
+window.bootstrap = require("bootstrap");
 var _ = require('lodash');
+import * as d3 from "d3";
+
 var introTemplate = require("./pages/introduction.html");
 var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("../templates/demographics.html");
@@ -27,6 +35,7 @@ require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 
 import {sociogram, sociogram_results} from "./js/sociogram.mjs";
+import * as socio_results from "./js/sociogram-results.mjs";
 
 //TODO: document "params.study_id" when updating the docs/7-ManageData!!!
 module.exports = (function(exports) {
@@ -123,7 +132,9 @@ module.exports = (function(exports) {
 			}
 		}
 		results_data.others = Math.round(accumulator/(params.sociogram.people.length-1));
-		showResults(results_data, true)
+		results_data.result_msg = results_data.self > results_data.others ?
+			$.i18n('study-socio-results-independent') : $.i18n('study-socio-results-interdependent');
+		showResults(results_data, true);
 	}
 
 	function showResults(results = {}, showFooter = false) {
@@ -232,6 +243,8 @@ module.exports = (function(exports) {
 	exports.study.params = params;
 	exports.study.sociogram = sociogram;
 	exports.study.sociogram_save = saveSociogramResults;
+	exports.study.sociogram_results = socio_results.setup;
+	exports.study.sociogram_results_draw = socio_results.drawBubbles;
 
 })( window.LITW = window.LITW || {} );
 

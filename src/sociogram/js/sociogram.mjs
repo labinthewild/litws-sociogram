@@ -46,7 +46,7 @@ const sociogram_canvas = (p5) => {
   const SELECT_COLOR = p5.color('red');
   const BUBBLE_MAX_SIZE = CANVAS_SIZE/4;
   const BUBBLE_MIN_SIZE = CANVAS_SIZE/20;
-  let delButton = new DeleteButton();
+  let delButton = null;
   let tempBubble = null;
 
   p5.setup = () => {
@@ -55,6 +55,7 @@ const sociogram_canvas = (p5) => {
     canvas.mouseMoved(mouseMoved);
     canvas.mouseReleased(mouseReleased);
     canvas.parent(DIV_NAME);
+    delButton = new DeleteButton();
   }
 
   p5.draw = () => {
@@ -183,10 +184,14 @@ const sociogram_canvas = (p5) => {
       this.y = centerY;
       this.w = BUBBLE_MIN_SIZE;
       this.temporary = true;
+      this.name = null;
+    }
+
+    addLabel() {
       this.name = p5.createInput();
       this.name.position(
-          adjustXForCanvasPosition(this.x-(this.name.width/2)),
-          adjustYForCanvasPosition(this.y+(this.w/2))
+          adjustXForCanvasPosition(this.x - (this.name.width / 2)),
+          adjustYForCanvasPosition(this.y + (this.w / 2))
       );
     }
 
@@ -195,7 +200,7 @@ const sociogram_canvas = (p5) => {
         p5.stroke(SELECT_COLOR);
         p5.fill(SELECT_COLOR);
       } else {
-        if(this.isMouseOverBubble() || this.isMouseOverLable()){
+        if(this.isMouseOverBubble() || this.isMouseOverLabel()){
           p5.stroke(SELECT_COLOR);
           p5.fill(SELECT_COLOR);
         } else {
@@ -208,6 +213,7 @@ const sociogram_canvas = (p5) => {
 
     finalize() {
       this.temporary = false;
+      this.addLabel();
     }
     getX() {
       return this.x;
@@ -232,12 +238,16 @@ const sociogram_canvas = (p5) => {
       return p5.collidePointCircle(p5.mouseX, p5.mouseY, this.x, this.y, this.w);
     }
 
-    isMouseOverLable(){
-      return p5.collidePointRect(p5.mouseX, p5.mouseY, this.name.x, this.name.y, this.name.width, this.name.height);
+    isMouseOverLabel(){
+      if (this.name) {
+        return p5.collidePointRect(p5.mouseX, p5.mouseY, this.name.x, this.name.y, this.name.width, this.name.height);
+      } else {
+        return false;
+      }
     }
 
     isMouseOver() {
-      return this.isMouseOverBubble() || this.isMouseOverLable();
+      return this.isMouseOverBubble() || this.isMouseOverLabel();
     }
 
     deactivate() {

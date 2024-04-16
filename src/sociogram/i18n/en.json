@@ -105,8 +105,18 @@
   "litw-more-study2-slogan": "Learn to be a better writer!",
   "litw-more-study2-description": "Can you identify the writing strategies of experts? Improve your reading and writing while comparing yourself to experts in this 10 minute study!",
   "study-socio-instruct-header": "What does your social network look like?",
-  "study-socio-instruct-p1": "Please click anywhere in the canvas below to draw a circle for 8-10 people in your social network, such as family members, friends, co-workers, and yourself.",
-  "study-socio-instruct-p2": "Click on the canvas to ADD a person represented by a circle. You can CHANGE the size of the circle by clicking on it and dragging up and down.",
-  "study-socio-instruct-p3": "Below the circle, please type in who the circle represents. At least one of the circles has to be 'ME'!",
-  "study-socio-button-done": "I'm done"
+  "study-socio-instruct-p1": "Please click anywhere in the canvas below to draw a circle for 5-10 people in your social network, such as family members, friends, co-workers, and yourself.",
+  "study-socio-instruct-p2": "Click on the canvas to ADD and drag (while clicked) to RESIZE the circle that represents a person. Delete a circle at any time by clicking the button that appears when hovering a circle.",
+  "study-socio-instruct-p3": "Below the circle, please type in who the circle represents. AT LEAST ONE of the circles has to be labeled 'ME'!",
+  "study-socio-button-done": "I'm done",
+  "study-socio-results-self": "Self",
+  "study-socio-results-others": "OTHERS",
+  "study-socio-results-others-you": "Yours",
+  "study-socio-results-others-JP": "Japan",
+  "study-socio-results-others-US": "USA",
+  "study-socio-results-independent": "Your drawings show you are INdependent!",
+  "study-socio-results-interdependent": "Your drawings show you are INTERdependent!",
+  "study-socio-results-exp-p1": "Below you can see the average circle sizes for your own social network (i.e., OTHERS) compared with the average from participants from two other countries.",
+  "study-socio-results-exp-p2": "Japanese participants tend to draw OTHERS a bit larger or the same size of their own self circle (more interdependent); while US Americans tended to draw OTHERS smaller then their self circles (more independent)."
+
 }
