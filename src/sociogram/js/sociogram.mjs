@@ -42,11 +42,12 @@ const sociogram_canvas = (p5) => {
   }
   const CANVAS_SIZE = CANVAS_ELEM.clientWidth;
   const CANVAS_COLOR = p5.color('white');
-  const DEFAULT_COLOR = p5.color('darkgray');
-  const SELECT_COLOR = p5.color('red');
+  const DEFAULT_COLOR = p5.color('black');
+  const SELECT_COLOR = p5.color('black');
   const BUBBLE_MAX_SIZE = CANVAS_SIZE/4;
   const BUBBLE_MIN_SIZE = CANVAS_SIZE/20;
   let delButton = null;
+  let bubbleType = null;
   let tempBubble = null;
 
   p5.setup = () => {
@@ -56,6 +57,7 @@ const sociogram_canvas = (p5) => {
     canvas.mouseReleased(mouseReleased);
     canvas.parent(DIV_NAME);
     delButton = new DeleteButton();
+    bubbleType = new BubbleType(onLabelSelection);
   }
 
   p5.draw = () => {
@@ -76,13 +78,22 @@ const sociogram_canvas = (p5) => {
     delButton.draw();
   }
 
-  let mouseReleased = () => {
+  let onLabelSelection = () => {
     if(tempBubble) {
-      tempBubble.finalize();
+      tempBubble.finalize(bubbleType.getSelected());
       bubbles.push(tempBubble);
       tempBubble = null;
+      bubbleType.reset();
+    }    
+  }
+
+  let mouseReleased = () => {
+    if(tempBubble) {
+      bubbleType.setVisible(tempBubble.getX, tempBubble.getY);
+      tempBubble.setDrawingAsFinished();
     }
   }
+
   let mousePressed = () => {
     if(delButton.isMouseOver()) {
       delButton.click();
@@ -94,7 +105,7 @@ const sociogram_canvas = (p5) => {
   }
 
   let mouseMoved = () => {
-    if (tempBubble) {
+    if (tempBubble && !tempBubble.isDrawingFinished()) {
       let dist = Math.sqrt(
           Math.pow(tempBubble.getX()-p5.mouseX, 2)+
           Math.pow(tempBubble.getY()-p5.mouseY, 2)
@@ -139,6 +150,49 @@ const sociogram_canvas = (p5) => {
     return false;
   };
 
+
+  class BubbleType {
+    constructor (onChangeCallbackFn) {
+      this.x = 0;
+      this.y = 0;
+      this.visible = false;
+      this.INITIAL_OPTION = 'CHOOSE SOCIAL GROUP';
+
+      this.dropdown = p5.createSelect();
+      this.dropdown.option(this.INITIAL_OPTION);
+      this.dropdown.option('self');
+      this.dropdown.option('acquaintance');
+      this.dropdown.option('family');
+      this.dropdown.option('friend');
+      this.dropdown.changed(onChangeCallbackFn);
+      this.reset();
+    }
+
+    draw() {
+      if(this.visible) {
+        this.dropdown.position(x,y);
+      } else {
+        this.dropdown.position(-1000,-1000);
+      }
+    }
+
+    getSelected() {
+      return this.dropdown.value();
+    }
+
+    setVisible(x, y) {
+      this.x = x;
+      this.y = y;
+      this.visible = true;
+    }
+
+    reset() {
+      this.visible = false;
+      this.dropdown.disable(this.INITIAL_OPTION);
+      this.dropdown.selected(this.INITIAL_OPTION);
+    }
+
+  }
 
   class DeleteButton {
     constructor () {
@@ -185,36 +239,33 @@ const sociogram_canvas = (p5) => {
       this.w = BUBBLE_MIN_SIZE;
       this.temporary = true;
       this.name = null;
-    }
-
-    addLabel() {
-      this.name = p5.createInput();
-      this.name.position(
-          adjustXForCanvasPosition(this.x - (this.name.width / 2)),
-          adjustYForCanvasPosition(this.y + (this.w / 2))
-      );
+      this.finishedDrawing = false;
     }
 
     draw(){
       if(this.temporary){
         p5.stroke(SELECT_COLOR);
-        p5.fill(SELECT_COLOR);
+        p5.strokeWeight(1);
       } else {
-        if(this.isMouseOverBubble() || this.isMouseOverLabel()){
+        if(this.isMouseOverBubble()){
           p5.stroke(SELECT_COLOR);
-          p5.fill(SELECT_COLOR);
         } else {
           p5.stroke(DEFAULT_COLOR);
-          p5.fill(DEFAULT_COLOR);
         }
+        p5.strokeWeight(2);
       }
       p5.ellipse(this.x, this.y, this.w);
+      p5.textAlign(p5.CENTER, p5.CENTER);
+      if(this.name) {
+        p5.text(this.name, this.x/2, this.y/2);        
+      }
     }
 
-    finalize() {
+    finalize(bubbleLabel) {
       this.temporary = false;
-      this.addLabel();
+      this.name = bubbleLabel;
     }
+
     getX() {
       return this.x;
     }
@@ -234,26 +285,26 @@ const sociogram_canvas = (p5) => {
       }
     }
 
+    isDrawingFinished() {
+      return this.finishedDrawing;
+    }
+
+    setDrawingAsFinished() {
+      this.finishedDrawing = true;
+    }
+
     isMouseOverBubble(){
       return p5.collidePointCircle(p5.mouseX, p5.mouseY, this.x, this.y, this.w);
     }
 
-    isMouseOverLabel(){
-      if (this.name) {
-        return p5.collidePointRect(p5.mouseX, p5.mouseY, this.name.x, this.name.y, this.name.width, this.name.height);
-      } else {
-        return false;
-      }
-    }
-
     isMouseOver() {
-      return this.isMouseOverBubble() || this.isMouseOverLabel();
+      return this.isMouseOverBubble();
     }
 
     deactivate() {
       this.x = -1000;
       this.y = -1000;
-      this.name.remove();
+      this.name = null;
     }
 
     export() {
@@ -261,7 +312,7 @@ const sociogram_canvas = (p5) => {
         x: this.x,
         y: this.y,
         radius: this.w/2,
-        name: this.name.value()
+        label: this.name
       }
     }
   }

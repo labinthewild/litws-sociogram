@@ -20,7 +20,7 @@ require("handlebars");
 window.$.alpaca = require("alpaca");
 window.bootstrap = require("bootstrap");
 var _ = require('lodash');
-import * as d3 from "d3";
+// import * as d3 from "d3";
 
 var introTemplate = require("./pages/introduction.html");
 var irbTemplate = require("../templates/irb.html");
@@ -109,7 +109,7 @@ module.exports = (function(exports) {
 	};
 
 	function configureStudy() {
-		timeline.push(params.slides.INTRODUCTION);
+		// timeline.push(params.slides.INTRODUCTION);
 		// timeline.push(params.slides.INFORMED_CONSENT);
 		// timeline.push(params.slides.DEMOGRAPHICS);
 		timeline.push(params.slides.SOCIOGRAM);
