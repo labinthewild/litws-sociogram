@@ -20,7 +20,6 @@ require("handlebars");
 window.$.alpaca = require("alpaca");
 window.bootstrap = require("bootstrap");
 var _ = require('lodash');
-// import * as d3 from "d3";
 
 var introTemplate = require("./pages/introduction.html");
 var irbTemplate = require("../templates/irb.html");
@@ -34,7 +33,7 @@ var sociogramTemplate = require("./pages/sociogram.html");
 require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 
-import {sociogram, sociogram_results} from "./js/sociogram.mjs";
+import * as socio_utils from "./js/sociogram.mjs";
 import * as socio_results from "./js/sociogram-results.mjs";
 
 //TODO: document "params.study_id" when updating the docs/7-ManageData!!!
@@ -118,17 +117,19 @@ module.exports = (function(exports) {
 	}
 
 	function saveSociogramResults() {
-		params.sociogram = sociogram_results();
+		params.sociogram = socio_utils.sociogram_data();
 		LITW.data.submitStudyData({
 			sociogram: params.sociogram
 		});
 	}
 
 	function calculateResults() {
+		socio_utils.sociogram_clean_up();
 		let results_data = {}
 		let accumulator = 0;
 		for (let person of params.sociogram.people) {
-			if(person.name === 'ME') {
+			//TODO: need to get this value from the library!!!!
+			if(person.label === 'self') {
 				results_data.self = Math.round(person.radius)
 			} else {
 				accumulator += person.radius
@@ -244,7 +245,7 @@ module.exports = (function(exports) {
 	});
 	exports.study = {};
 	exports.study.params = params;
-	exports.study.sociogram = sociogram;
+	exports.study.sociogram = socio_utils.sociogram;
 	exports.study.sociogram_save = saveSociogramResults;
 	exports.study.sociogram_results = socio_results.setup;
 	exports.study.sociogram_results_draw = socio_results.drawBubbles;

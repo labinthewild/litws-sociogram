@@ -1,3 +1,5 @@
+import * as d3 from "d3";
+window.d3 = d3;
 
 const PAGE_CONTENT_WIDTH = document.getElementById('content').offsetWidth;
 const MAX_GRAPH_WIDTH = 900;

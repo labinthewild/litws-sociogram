@@ -9,13 +9,20 @@ window.p5 = p5;
 
 let DIV_NAME = null;
 let bubbles = [];
+let to_remove=[];
 
 let sociogram = (div_name) => {
   DIV_NAME = div_name;
   new p5(sociogram_canvas);
 }
 
-let sociogram_results = () => {
+let sociogram_clean_up = () => {
+  for(let elem of to_remove) {
+    elem.remove();
+  }
+}
+
+let sociogram_data = () => {
   let result = {
     canvas_size: {
       width: document.getElementById(DIV_NAME).clientWidth,
@@ -57,7 +64,7 @@ const sociogram_canvas = (p5) => {
     canvas.mouseReleased(mouseReleased);
     canvas.parent(DIV_NAME);
     delButton = new DeleteButton();
-    bubbleType = new BubbleType(onLabelSelection);
+    bubbleType = new BubbleType(10, 10, onLabelSelection);
   }
 
   p5.draw = () => {
@@ -89,8 +96,8 @@ const sociogram_canvas = (p5) => {
 
   let mouseReleased = () => {
     if(tempBubble) {
-      bubbleType.setVisible(tempBubble.getX, tempBubble.getY);
       tempBubble.setDrawingAsFinished();
+      bubbleType.enable();
     }
   }
 
@@ -152,44 +159,40 @@ const sociogram_canvas = (p5) => {
 
 
   class BubbleType {
-    constructor (onChangeCallbackFn) {
-      this.x = 0;
-      this.y = 0;
-      this.visible = false;
-      this.INITIAL_OPTION = 'CHOOSE SOCIAL GROUP';
+    constructor (x, y, onChangeCallbackFn) {
+      this.x = adjustXForCanvasPosition(x);
+      this.y = adjustYForCanvasPosition(y);
+      this.DRAW_MSG_OPTION = 'CLICK+DRAG TO DRAW!';
+      this.CHOOSE_OPTION = 'CHOOSE PERSON TYPE';
 
       this.dropdown = p5.createSelect();
-      this.dropdown.option(this.INITIAL_OPTION);
+      this.dropdown.position(this.x, this.y);
+      this.dropdown.option(this.DRAW_MSG_OPTION);
+      this.dropdown.option(this.CHOOSE_OPTION);
       this.dropdown.option('self');
       this.dropdown.option('acquaintance');
       this.dropdown.option('family');
       this.dropdown.option('friend');
       this.dropdown.changed(onChangeCallbackFn);
       this.reset();
+      //patchy solution to avoid loading the whole P5.JS DOM library.
+      to_remove.push(this.dropdown.elt);
     }
 
-    draw() {
-      if(this.visible) {
-        this.dropdown.position(x,y);
-      } else {
-        this.dropdown.position(-1000,-1000);
-      }
+    enable(){
+      this.dropdown.enable();
+      this.dropdown.disable(this.CHOOSE_OPTION);
+      this.dropdown.disable(this.DRAW_MSG_OPTION);
+      this.dropdown.selected(this.CHOOSE_OPTION);
     }
 
     getSelected() {
       return this.dropdown.value();
     }
 
-    setVisible(x, y) {
-      this.x = x;
-      this.y = y;
-      this.visible = true;
-    }
-
     reset() {
-      this.visible = false;
-      this.dropdown.disable(this.INITIAL_OPTION);
-      this.dropdown.selected(this.INITIAL_OPTION);
+      this.dropdown.disable();
+      this.dropdown.selected(this.DRAW_MSG_OPTION);
     }
 
   }
@@ -243,6 +246,7 @@ const sociogram_canvas = (p5) => {
     }
 
     draw(){
+      p5.push();
       if(this.temporary){
         p5.stroke(SELECT_COLOR);
         p5.strokeWeight(1);
@@ -255,9 +259,12 @@ const sociogram_canvas = (p5) => {
         p5.strokeWeight(2);
       }
       p5.ellipse(this.x, this.y, this.w);
-      p5.textAlign(p5.CENTER, p5.CENTER);
+      p5.pop();
       if(this.name) {
-        p5.text(this.name, this.x/2, this.y/2);        
+        p5.textAlign(p5.CENTER, p5.CENTER);
+        p5.textSize(14);
+        p5.textStyle(p5.NORMAL);
+        p5.text(this.name, this.x, this.y);
       }
     }
 
@@ -318,4 +325,4 @@ const sociogram_canvas = (p5) => {
   }
 }
 
-export {sociogram, sociogram_results};
+export {sociogram, sociogram_data, sociogram_clean_up};
