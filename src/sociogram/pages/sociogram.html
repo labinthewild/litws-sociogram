@@ -9,21 +9,50 @@
         <p data-i18n="study-socio-instruct-p3"></p>
     </div>
     <button type="button" class="btn btn-lg btn-primary mb-4" onclick="wrap_up()" data-i18n="study-socio-button-done"></button>
+    <div id="sociogram-alert-minimum" class="alert alert-primary alert-dismissible fade show" role="alert" style="display: none;">
+      <span data-i18n="study-socio-button-alert-minimum"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="close_alert('sociogram-alert-minimum')"></button>
+    </div>
+    <div id="sociogram-alert-self" class="alert alert-primary alert-dismissible fade show" role="alert" style="display: none;">
+      <span data-i18n="study-socio-button-alert-self"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="close_alert('sociogram-alert-self')"></button>
+    </div>
 </div>
 
 <div id="sociogram-drawing" class="border border-primary"></div>
 
 <script type="text/javascript">
     let wrap_up = () => {
-        LITW.study.sociogram_save();
-        let input_elements = document.getElementsByTagName('input');
-        while(input_elements[0]) {
-            input_elements[0].remove();
+        let minimun = LITW.study.params.sociogram_minumum_people;
+        let people = LITW.study.sociogram_status().people;
+        if (people.length < minimun) {
+            document.getElementById('sociogram-alert-minimum').style['display']='';
+        } else {
+            let self = false;
+            for(person of people) {
+                if(person.label === 'self') {
+                    self = true;
+                }
+            }
+            if(!self) {
+                document.getElementById('sociogram-alert-self').style['display']='';
+            } else {
+                LITW.study.sociogram_save();
+                let input_elements = document.getElementsByTagName('input');
+                while(input_elements[0]) {
+                    input_elements[0].remove();
+                }
+                $('#btn-next-page').click();                
+            }
         }
-        $('#btn-next-page').click();
+    }
+
+    let close_alert = (alert_id) => {
+        document.getElementById(alert_id).style['display']='none';
     }
 
     $(document).ready(function() {
         LITW.study.sociogram('sociogram-drawing');
     });
+
 </script>

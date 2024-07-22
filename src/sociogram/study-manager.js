@@ -41,6 +41,7 @@ module.exports = (function(exports) {
 	var timeline = [],
 	params = {
 		study_id: "1783e5ff-3c49-458d-8806-196bbfac52a3",
+		sociogram_minumum_people: 3,
 		sociogram: {
 			TEST: 'DATA',
 			canvas_size: {},
@@ -246,6 +247,7 @@ module.exports = (function(exports) {
 	exports.study = {};
 	exports.study.params = params;
 	exports.study.sociogram = socio_utils.sociogram;
+	exports.study.sociogram_status = socio_utils.sociogram_data;
 	exports.study.sociogram_save = saveSociogramResults;
 	exports.study.sociogram_results = socio_results.setup;
 	exports.study.sociogram_results_draw = socio_results.drawBubbles;

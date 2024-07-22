@@ -11,6 +11,8 @@ let DIV_NAME = null;
 let bubbles = [];
 let to_remove=[];
 
+//TODO: [BUG] if you delete a temp bubble the dropdown keeps been active. 
+
 let sociogram = (div_name) => {
   DIV_NAME = div_name;
   new p5(sociogram_canvas);
@@ -64,7 +66,7 @@ const sociogram_canvas = (p5) => {
     canvas.mouseReleased(mouseReleased);
     canvas.parent(DIV_NAME);
     delButton = new DeleteButton();
-    bubbleType = new BubbleType(10, 10, onLabelSelection);
+    bubbleType = new BubbleType(10, 10, onLabelSelection, CANVAS_ELEM);
   }
 
   p5.draw = () => {
@@ -159,14 +161,13 @@ const sociogram_canvas = (p5) => {
 
 
   class BubbleType {
-    constructor (x, y, onChangeCallbackFn) {
+    constructor (x, y, onChangeCallbackFn, canvasElement=null) {
       this.x = adjustXForCanvasPosition(x);
       this.y = adjustYForCanvasPosition(y);
       this.DRAW_MSG_OPTION = 'CLICK+DRAG TO DRAW!';
       this.CHOOSE_OPTION = 'CHOOSE PERSON TYPE';
 
       this.dropdown = p5.createSelect();
-      this.dropdown.position(this.x, this.y);
       this.dropdown.option(this.DRAW_MSG_OPTION);
       this.dropdown.option(this.CHOOSE_OPTION);
       this.dropdown.option('self');
@@ -176,7 +177,16 @@ const sociogram_canvas = (p5) => {
       this.dropdown.changed(onChangeCallbackFn);
       this.reset();
       //patchy solution to avoid loading the whole P5.JS DOM library.
-      to_remove.push(this.dropdown.elt);
+      let select_elem = this.dropdown.elt;
+      to_remove.push(select_elem);
+      //ignore [x,y] and move element right before canvas
+      if (canvasElement) {
+        select_elem.style['position']='';
+        select_elem.style['max-width']='250px';
+        canvasElement.before(select_elem);
+      } else {
+        this.dropdown.position(this.x, this.y);
+      }
     }
 
     enable(){
