@@ -10,28 +10,40 @@
  *************************************************************/
 
 // load webpack modules
-// import $ from "jquery";
 window.$ = require("jquery");
-window.jQuery = $;
+window.jQuery = window.$;
 require("../js/jquery.i18n");
 require("../js/jquery.i18n.messagestore");
 require("jquery-ui-bundle");
-require("handlebars");
+let Handlebars = require("handlebars");
 window.$.alpaca = require("alpaca");
 window.bootstrap = require("bootstrap");
-var _ = require('lodash');
+window._ = require("lodash");
 
-var introTemplate = require("./pages/introduction.html");
-var irbTemplate = require("../templates/irb.html");
-var demographicsTemplate = require("../templates/demographics.html");
-var instructionsTemplate = require("../templates/instructions.html");
-var loadingTemplate = require("../templates/loading.html");
-var resultsTemplate = require("./pages/results.html");
-var resultsFooter = require("../templates/results-footer.html");
-var commentsTemplate = require("../templates/comments.html");
-var sociogramTemplate = require("./pages/sociogram.html");
-require("../js/litw/jspsych-display-info");
+//LOAD THE HTML FOR STUDY PAGES
+import progressHTML from "../templates/progress.html";
+Handlebars.registerPartial('prog', Handlebars.compile(progressHTML));
+import introHTML from "./pages/introduction.html";
+import irb_LITW_HTML from "../templates/irb2-litw.html";
+import questHTML from "../templates/questionnaire.html";
+import demographicsHTML from "../templates/demographics.html";
+import sociogramHTML from "./pages/sociogram.html";
+import loadingHTML from "../templates/loading.html";
+import resultsHTML from "./pages/results.html";
+import resultsFooterHTML from "../templates/results-footer.html";
+import commentsHTML from "../templates/comments.html";
+
 require("../js/litw/jspsych-display-slide");
+//CONVERT HTML INTO TEMPLATES
+let introTemplate = Handlebars.compile(introHTML);
+let irbLITWTemplate = Handlebars.compile(irb_LITW_HTML);
+let questTemplate = Handlebars.compile(questHTML);
+let demographicsTemplate = Handlebars.compile(demographicsHTML);
+let sociogramTemplate = Handlebars.compile(sociogramHTML);
+let loadingTemplate = Handlebars.compile(loadingHTML);
+let resultsTemplate = Handlebars.compile(resultsHTML);
+let resultsFooterTemplate = Handlebars.compile(resultsFooterHTML);
+let commentsTemplate = Handlebars.compile(commentsHTML);
 
 import * as socio_utils from "./js/sociogram.mjs";
 import * as socio_results from "./js/sociogram-results.mjs";
@@ -64,17 +76,21 @@ module.exports = (function(exports) {
 			INFORMED_CONSENT: {
 				name: "informed_consent",
 				type: "display-slide",
-				template: irbTemplate,
+				template: irbLITWTemplate,
 				display_element: $("#irb"),
 				display_next_button: false,
 			},
 			DEMOGRAPHICS: {
 				type: "display-slide",
 				template: demographicsTemplate,
+				template_data: {
+					local_data_id: 'LITW_DEMOGRAPHICS'
+				},
 				display_element: $("#demographics"),
 				name: "demographics",
 				finish: function(){
 					var dem_data = $('#demographicsForm').alpaca().getValue();
+					LITW.data.addToLocal(this.template_data.local_data_id, dem_data);
 					LITW.data.submitDemographics(dem_data);
 				}
 			},
@@ -109,11 +125,11 @@ module.exports = (function(exports) {
 	};
 
 	function configureStudy() {
-		// timeline.push(params.slides.INTRODUCTION);
-		// timeline.push(params.slides.INFORMED_CONSENT);
-		// timeline.push(params.slides.DEMOGRAPHICS);
+		timeline.push(params.slides.INTRODUCTION);
+		timeline.push(params.slides.INFORMED_CONSENT);
+		timeline.push(params.slides.DEMOGRAPHICS);
 		timeline.push(params.slides.SOCIOGRAM);
-		// timeline.push(params.slides.COMMENTS);
+		timeline.push(params.slides.COMMENTS);
 		timeline.push(params.slides.RESULTS);
 	}
 
@@ -153,7 +169,7 @@ module.exports = (function(exports) {
 				data: results
 			}));
 		if(showFooter) {
-			$("#results-footer").html(resultsFooter(
+			$("#results-footer").html(resultsFooterTemplate(
 				{
 					share_url: window.location.href,
 					share_title: $.i18n('litw-irb-header'),
