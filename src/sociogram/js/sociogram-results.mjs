@@ -9,6 +9,7 @@ const DEFAULT_WIDTH = Math.min(PAGE_CONTENT_WIDTH, MAX_GRAPH_WIDTH);
 const DEFAULT_HEIGHT = MAX_GRAPH_HEIGHT;
 let canvas = null;
 let svg = null;
+let palette = ['#999999', '#999999', '#298c8c', '#f1a226'];
 
 let _drawBubble = function (ctx, x, y, radius, fill, stroke){
     ctx.append('circle')
@@ -20,32 +21,41 @@ let _drawBubble = function (ctx, x, y, radius, fill, stroke){
 }
 
 let drawBubbles = function(bubbles, others_label = 'OTHERS') {
-    let increment = svg.attr("width")/(bubbles.length+1);
+    let canvas_height = svg.attr("height");
+    let x_increment = svg.attr("width")/(bubbles.length+1);
+    let y_increment = canvas_height/10;
     let x = 0;
-    let y = svg.attr("height")/2;
+    let y = canvas_height/2;
     let fill_color = "none";
     let stroke_color = "black";
 
     let drawing = svg.append("g");
     drawing.append("text")
-            .attr('x', (bubbles.length-1)*increment)
+            .attr('x', (bubbles.length-1)*x_increment)
             .attr('y', y/3)
             .attr('text-anchor', 'middle')
             .attr('font-size', '1.5em')
             .text(others_label);
-    let count = 0;
+    // Draw YOU
+    x += x_increment;
+    _drawBubble(drawing, x, y, bubbles[0].radius, palette[0], stroke_color);
+    drawing.append("text")
+    .attr('x', x)
+    .attr('y', y)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '1.5em')
+    .text(bubbles[0].label);
+    // Draw OTHERS
+    let count = 1;
+    x += 2*x_increment;
     while(count<bubbles.length) {
-        x += increment
-        if(count===0) {
-            _drawBubble(drawing, x, y, bubbles[count].radius, 'grey', stroke_color);
-        } else {
-            _drawBubble(drawing, x, y, bubbles[count].radius, fill_color, stroke_color);
-        }
+        _drawBubble(drawing, x, y, bubbles[count].radius, fill_color, palette[count]);
         drawing.append("text")
-            .attr('x', x)
-            .attr('y', y)
+            .attr('x', x+x_increment)
+            .attr('y', (canvas_height/3)+(count*y_increment))
             .attr('text-anchor', 'middle')
             .attr('font-size', '1.5em')
+            .attr('fill', palette[count])
             .text(bubbles[count].label);
         count+=1;
     }

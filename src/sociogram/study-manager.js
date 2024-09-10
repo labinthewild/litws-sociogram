@@ -25,7 +25,6 @@ import progressHTML from "../templates/progress.html";
 Handlebars.registerPartial('prog', Handlebars.compile(progressHTML));
 import introHTML from "./pages/introduction.html";
 import irb_LITW_HTML from "../templates/irb2-litw.html";
-import questHTML from "../templates/questionnaire.html";
 import demographicsHTML from "../templates/demographics.html";
 import sociogramHTML from "./pages/sociogram.html";
 import loadingHTML from "../templates/loading.html";
@@ -37,7 +36,6 @@ require("../js/litw/jspsych-display-slide");
 //CONVERT HTML INTO TEMPLATES
 let introTemplate = Handlebars.compile(introHTML);
 let irbLITWTemplate = Handlebars.compile(irb_LITW_HTML);
-let questTemplate = Handlebars.compile(questHTML);
 let demographicsTemplate = Handlebars.compile(demographicsHTML);
 let sociogramTemplate = Handlebars.compile(sociogramHTML);
 let loadingTemplate = Handlebars.compile(loadingHTML);
@@ -58,9 +56,10 @@ module.exports = (function(exports) {
 			TEST: 'DATA',
 			canvas_size: {},
 			people: [
-				{x: 281.5, y: 152.234375, radius: 75, name: 'ME'},
-				{x: 639.5, y: 354.234375, radius: 67.5, name: 'YOU'},
-				{x: 278.5, y: 431.234375, radius: 27.5, name: 'THEM'}
+				{x: 281.5, y: 152.234375, radius: 75, label: 'self'},
+				{x: 639.5, y: 354.234375, radius: 67.5, label: 'family'},
+				{x: 278.5, y: 431.234375, radius: 37.5, label: 'friend'},
+				{x: 278.5, y: 431.234375, radius: 27.5, label: 'acquaintance'}
 			]
 		},
 		study_recommendation: [],

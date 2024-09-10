@@ -111,7 +111,9 @@
   "study-socio-results-others-US": "USA",
   "study-socio-results-independent": "Your drawings suggest you are more independent than interdependent!",
   "study-socio-results-interdependent": "Your drawings suggest you are more interdependent than independent!",
-  "study-socio-results-exp-p1": "Below you can see the average circle sizes for your own social network (i.e., OTHERS) compared with the average from participants from two other countries.",
-  "study-socio-results-exp-p2": "Japanese participants tend to draw OTHERS a bit larger or the same size of their own self circle (more interdependent); while US Americans tended to draw OTHERS smaller then their self circles (more independent)."
-
+  "study-socio-results-exp-p1": "Below you can see the average circle sizes for your own social network (i.e., OTHERS) compared with the average from participants from two countries.",
+  "study-socio-results-exp-p2": "Japanese participants tended to draw OTHERS a bit larger or the same size of their own self circle (more interdependent); while US Americans tended to draw OTHERS smaller then their self circles (more independent).",
+  "study-socio-results-ref-title": "Study References",
+  "study-socio-results-ref-2": "Talhelm, T., et al., (2014). Large-Scale Psychological Differences Within China Explained by Rice Versus Wheat Agriculture. Science 344, 603-608. DOI:10.1126/science.1246850",
+  "study-socio-results-ref-1": "Kitayama, S., et al., (2009). A cultural task analysis of implicit independence: Comparing North America, Western Europe, and East Asia. Journal of Personality and Social Psychology, 97(2), 236–255. DOI:10.1037/a0015999"
 }
