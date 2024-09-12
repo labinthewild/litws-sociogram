@@ -4,9 +4,26 @@
 <div class="instructions-stim-container text">
     <h2 class="bolded-blue" data-i18n="study-socio-instruct-header"></h2>
     <div class="text-start">
-        <p data-i18n="study-socio-instruct-p1"></p>
-        <p data-i18n="study-socio-instruct-p2"></p>
-        <p data-i18n="study-socio-instruct-p3"></p>
+        <ol>
+            <li>
+                <span data-i18n="study-socio-instruct-p1-1"></span>
+                <span class="fw-bold" data-i18n="study-socio-instruct-p1-2"></span>
+                <span data-i18n="study-socio-instruct-p1-3"></span>
+                <span data-i18n="study-socio-instruct-p1-4"></span>
+            </li>
+            <li>
+                <span class="fw-bold" data-i18n="study-socio-instruct-p2-1"></span>
+                <span data-i18n="study-socio-instruct-p2-2"></span>
+            </li>
+            <li>
+                <span data-i18n="study-socio-instruct-p3-1"></span>
+                <span class="fw-bold" data-i18n="study-socio-instruct-p3-2"></span>
+                <span data-i18n="study-socio-instruct-p3-3"></span>
+            </li>
+            <li>
+                <span data-i18n="study-socio-instruct-p4"></span>
+            </li>
+        </ol>
     </div>
     <button type="button" class="btn btn-lg btn-primary mb-4" onclick="wrap_up()" data-i18n="study-socio-button-done"></button>
     <div id="sociogram-alert-minimum" class="alert alert-primary alert-dismissible fade show" role="alert" style="display: none;">
@@ -19,13 +36,13 @@
     </div>
 </div>
 
-<div id="sociogram-drawing" class="border border-primary"></div>
+<div id="sociogram-drawing" class="border border-primary" style="cursor: crosshair"></div>
 
 <script type="text/javascript">
     let wrap_up = () => {
-        let minimun = LITW.study.params.sociogram_minumum_people;
+        let minimum = LITW.study.params.sociogram_minimum_people;
         let people = LITW.study.sociogram_status().people;
-        if (people.length < minimun) {
+        if (people.length < minimum) {
             document.getElementById('sociogram-alert-minimum').style['display']='';
         } else {
             let self = false;

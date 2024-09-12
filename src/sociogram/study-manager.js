@@ -51,7 +51,7 @@ module.exports = (function(exports) {
 	var timeline = [],
 	params = {
 		study_id: "1783e5ff-3c49-458d-8806-196bbfac52a3",
-		sociogram_minumum_people: 3,
+		sociogram_minimum_people: 5,
 		sociogram: {
 			TEST: 'DATA',
 			canvas_size: {},

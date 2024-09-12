@@ -194,6 +194,7 @@ const sociogram_canvas = (p5) => {
       this.dropdown.disable(this.CHOOSE_OPTION);
       this.dropdown.disable(this.DRAW_MSG_OPTION);
       this.dropdown.selected(this.CHOOSE_OPTION);
+      this.dropdown.elt.focus({focusVisible: true});
     }
 
     getSelected() {
