@@ -64,6 +64,9 @@ const sociogram_canvas = (p5) => {
     canvas.mousePressed(mousePressed);
     canvas.mouseMoved(mouseMoved);
     canvas.mouseReleased(mouseReleased);
+    canvas.touchStarted(mousePressed);
+    canvas.touchMoved(mouseMoved);
+    canvas.touchEnded(mouseReleased);
     canvas.parent(DIV_NAME);
     delButton = new DeleteButton();
     bubbleType = new BubbleType(10, 10, onLabelSelection, CANVAS_ELEM);
