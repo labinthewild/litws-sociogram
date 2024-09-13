@@ -48,8 +48,13 @@ import * as socio_results from "./js/sociogram-results.mjs";
 
 //TODO: document "params.study_id" when updating the docs/7-ManageData!!!
 module.exports = (function(exports) {
-	var timeline = [],
-	params = {
+	const study_times= {
+			SHORT: 5,
+			MEDIUM: 10,
+			LONG: 15,
+		};
+	let timeline = [];
+	let params = {
 		study_id: "1783e5ff-3c49-458d-8806-196bbfac52a3",
 		sociogram_minimum_people: 5,
 		sociogram: {
@@ -76,6 +81,9 @@ module.exports = (function(exports) {
 				name: "informed_consent",
 				type: "display-slide",
 				template: irbLITWTemplate,
+				template_data: {
+					time: study_times.SHORT
+				},
 				display_element: $("#irb"),
 				display_next_button: false,
 			},

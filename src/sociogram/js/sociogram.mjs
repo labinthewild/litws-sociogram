@@ -52,7 +52,7 @@ const sociogram_canvas = (p5) => {
   const CANVAS_SIZE = CANVAS_ELEM.clientWidth;
   const CANVAS_COLOR = p5.color('white');
   const DEFAULT_COLOR = p5.color('black');
-  const SELECT_COLOR = p5.color('black');
+  const SELECT_COLOR = p5.color('red');
   const BUBBLE_MAX_SIZE = CANVAS_SIZE/4;
   const BUBBLE_MIN_SIZE = CANVAS_SIZE/20;
   let delButton = null;
@@ -61,6 +61,9 @@ const sociogram_canvas = (p5) => {
 
   p5.setup = () => {
     let canvas = p5.createCanvas(CANVAS_SIZE, window.innerHeight);
+    canvas.elt.width = CANVAS_SIZE;
+    canvas.elt.height = window.innerHeight;
+    canvas.elt.style = "";
     canvas.mousePressed(mousePressed);
     canvas.mouseMoved(mouseMoved);
     canvas.mouseReleased(mouseReleased);
@@ -77,17 +80,13 @@ const sociogram_canvas = (p5) => {
     if(tempBubble){
       tempBubble.draw();
     }
-    let current_selection = null;
     for(let i=0; i<bubbles.length; i++) {
       let bub = bubbles[i];
-      if(bub.isMouseOver()){
-        delButton.setPosition(bub.getX()+bub.getRadius()-20, bub.getY());
-        current_selection = i;
+      bub.draw();
+      if(bub.selected){
+        delButton.draw(i);
       }
-      bubbles[i].draw();
     }
-    delButton.setTarget(current_selection);
-    delButton.draw();
   }
 
   let onLabelSelection = () => {
@@ -103,15 +102,41 @@ const sociogram_canvas = (p5) => {
     if(tempBubble) {
       tempBubble.setDrawingAsFinished();
       bubbleType.enable();
+    } else {
+      bubbleType.reset();
     }
   }
 
-  let mousePressed = () => {
-    if(delButton.isMouseOver()) {
+  let getPointerXY = (pointerEvent) => {
+    let pointerPosition = {x: 0, y: 0};
+    if(pointerEvent.touches) {
+      pointerEvent.preventDefault();
+      let touch = pointerEvent.touches[0];
+      pointerPosition.x = touch.pageX - touch.target.offsetLeft;
+      pointerPosition.y = touch.pageY - touch.target.offsetTop;
+    } else if( pointerEvent.offsetX ) {
+      pointerPosition.x = pointerEvent.offsetX;
+      pointerPosition.y = pointerEvent.offsetY;
+    } else {
+      pointerPosition.x = p5.mouseX;
+      pointerPosition.y = p5.mouseY;
+    }
+    return pointerPosition;
+  }
+
+  let mousePressed = (event) => {
+    let pointer = getPointerXY(event);
+    if(delButton.isPointerOver(pointer.x, pointer.y)) {
       delButton.click();
     } else {
-      if (!tempBubble) {
-        tempBubble = new Bubble(p5.mouseX, p5.mouseY);
+      let selectedBubbleBeforeClick = getSelectedBubble();
+      if(!tempBubble) {
+        let isBubbleSelected = updateBubbleSelection(pointer.x, pointer.y);
+        if( selectedBubbleBeforeClick == null && !isBubbleSelected) {
+          tempBubble = new Bubble(pointer.x, pointer.y);
+        }
+      } else {
+        tempBubble = null;
       }
     }
   }
@@ -126,21 +151,25 @@ const sociogram_canvas = (p5) => {
     }
   }
 
-  let isOverBubble = () => {
+  let getSelectedBubble = () => {
     for(let i=0; i<bubbles.length; i++) {
-      if(bubbles[i].isMouseOver()){
-        return true;
+      if (bubbles[i].selected) return bubbles[i];
+    }
+    return null;
+  }
+
+  let updateBubbleSelection = (pointerX, pointerY) => {
+    let selected = false;
+    for(let i=0; i<bubbles.length; i++) {
+      if(bubbles[i].isPointerOver(pointerX, pointerY)){
+        bubbles[i].select();
+        selected = true;
+      } else {
+        bubbles[i].unselect();
       }
     }
-    return false;
-  }
-
-  let adjustXForCanvasPosition= (x) => {
-    return x + CANVAS_INITIAL_POSITION.x;
-  }
-
-  let adjustYForCanvasPosition= (y) => {
-    return y + CANVAS_INITIAL_POSITION.y;
+    if(selected) delButton.clear();
+    return selected;
   }
 
   // SOURCE: https://github.com/bmoren/p5.collide2D
@@ -165,15 +194,16 @@ const sociogram_canvas = (p5) => {
 
   class BubbleType {
     constructor (x, y, onChangeCallbackFn, canvasElement=null) {
-      this.x = adjustXForCanvasPosition(x);
-      this.y = adjustYForCanvasPosition(y);
+      this.x = x + CANVAS_INITIAL_POSITION.x;
+      this.y = y + CANVAS_INITIAL_POSITION.y;
       this.DRAW_MSG_OPTION = 'CLICK+DRAG TO DRAW!';
       this.CHOOSE_OPTION = 'CHOOSE PERSON TYPE';
+      this.SELF_OPTION = 'self';
 
       this.dropdown = p5.createSelect();
       this.dropdown.option(this.DRAW_MSG_OPTION);
       this.dropdown.option(this.CHOOSE_OPTION);
-      this.dropdown.option('self');
+      this.dropdown.option(this.SELF_OPTION);
       this.dropdown.option('acquaintance');
       this.dropdown.option('family');
       this.dropdown.option('friend');
@@ -185,7 +215,7 @@ const sociogram_canvas = (p5) => {
       //ignore [x,y] and move element right before canvas
       if (canvasElement) {
         select_elem.style['position']='';
-        select_elem.style['max-width']='250px';
+        select_elem.style['max-width']='300px';
         canvasElement.before(select_elem);
       } else {
         this.dropdown.position(this.x, this.y);
@@ -194,10 +224,21 @@ const sociogram_canvas = (p5) => {
 
     enable(){
       this.dropdown.enable();
+      if (this.isSelfPresent(bubbles)) {
+        this.dropdown.disable(this.SELF_OPTION);
+      }
       this.dropdown.disable(this.CHOOSE_OPTION);
       this.dropdown.disable(this.DRAW_MSG_OPTION);
       this.dropdown.selected(this.CHOOSE_OPTION);
       this.dropdown.elt.focus({focusVisible: true});
+    }
+
+    isSelfPresent(bubbles) {
+      for (let i=0; i<bubbles.length; i++) {
+        if(bubbles[i].name === this.SELF_OPTION)
+          return true;
+      }
+      return false;
     }
 
     getSelected() {
@@ -213,26 +254,30 @@ const sociogram_canvas = (p5) => {
 
   class DeleteButton {
     constructor () {
-      this.x = 0;
-      this.y = 0;
+      this.x = -100;
+      this.y = -100;
       this.icon = p5.loadImage('./img/trash3.svg');
       this.target = null;
-      this.size = 150;
+      this.size = BUBBLE_MIN_SIZE/2;
     }
 
-    setPosition(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-
-    draw() {
-      if(this.target != null) {
-        p5.image(this.icon, this.x, this.y);
+    draw(bubble_pos) {
+      if(bubble_pos < bubbles.length || bubble_pos >= 0) {
+        let bub = bubbles[bubble_pos];
+        this.target = bubble_pos;
+        this.x = bub.getX()-this.size/2;
+        this.y = bub.getY()+bub.getRadius()-20;
+        p5.push();
+        p5.imageMode(p5.CORNER);
+        p5.image(this.icon, this.x, this.y, this.size, this.size);
+        p5.pop();
       }
     }
 
-    setTarget(bubble_position) {
-      this.target = bubble_position;
+    clear() {
+      this.target = null;
+      this.x = -100;
+      this.y = -100;
     }
 
     click() {
@@ -243,11 +288,10 @@ const sociogram_canvas = (p5) => {
       this.target = null;
     }
 
-    isMouseOver(){
-      return p5.collidePointRect(p5.mouseX, p5.mouseY, this.x, this.y, this.size, this.size);
+    isPointerOver(pointerX, pointerY){
+      return p5.collidePointRect(pointerX, pointerY, this.x, this.y, this.size, this.size);
     }
   }
-
 
   class Bubble {
     constructor(centerX, centerY) {
@@ -255,21 +299,19 @@ const sociogram_canvas = (p5) => {
       this.y = centerY;
       this.w = BUBBLE_MIN_SIZE;
       this.temporary = true;
+      this.selected = false;
       this.name = null;
       this.finishedDrawing = false;
     }
 
     draw(){
       p5.push();
-      if(this.temporary){
+      p5.fill('none');
+      if(this.temporary || this.selected){
         p5.stroke(SELECT_COLOR);
         p5.strokeWeight(1);
       } else {
-        if(this.isMouseOverBubble()){
-          p5.stroke(SELECT_COLOR);
-        } else {
-          p5.stroke(DEFAULT_COLOR);
-        }
+        p5.stroke(DEFAULT_COLOR);
         p5.strokeWeight(2);
       }
       p5.ellipse(this.x, this.y, this.w);
@@ -314,12 +356,16 @@ const sociogram_canvas = (p5) => {
       this.finishedDrawing = true;
     }
 
-    isMouseOverBubble(){
-      return p5.collidePointCircle(p5.mouseX, p5.mouseY, this.x, this.y, this.w);
+    isPointerOver(pointerX, pointerY) {
+      return p5.collidePointCircle(pointerX, pointerY, this.x, this.y, this.w);
     }
 
-    isMouseOver() {
-      return this.isMouseOverBubble();
+    select() {
+      this.selected = true;
+    }
+
+    unselect() {
+      this.selected = false;
     }
 
     deactivate() {

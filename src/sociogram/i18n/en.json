@@ -107,7 +107,7 @@
   "study-socio-instruct-p3-1": "To finish drawing each person,",
   "study-socio-instruct-p3-2": "choose their category",
   "study-socio-instruct-p3-3": "in the top-left dropdown menu.",
-  "study-socio-instruct-p4": "You can delete a circle at any time by clicking the button that appears when hovering a circle.",
+  "study-socio-instruct-p4": "You can delete a person by clicking on them and then on the delete button inside the circle.",
   "study-socio-button-done": "I'm done",
   "study-socio-button-alert-minimum": "Please draw the specified minimum of people before moving on!",
   "study-socio-button-alert-self": "Please draw one people to represent the 'SELF' category!",
