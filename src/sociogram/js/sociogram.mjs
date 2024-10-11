@@ -44,26 +44,35 @@ let sociogram_data = () => {
 
 //NEAT SOLUTION: https://github.com/processing/p5.js/wiki/p5.js-overview#instantiation--namespace
 const sociogram_canvas = (p5) => {
+  const PIXEL_RATIO = window.devicePixelRatio;
   const CANVAS_ELEM = document.getElementById(DIV_NAME);
   const CANVAS_INITIAL_POSITION = {
     x: CANVAS_ELEM.getBoundingClientRect().x,
     y: CANVAS_ELEM.getBoundingClientRect().y
   }
-  const CANVAS_SIZE = CANVAS_ELEM.clientWidth;
+  const CANVAS_WIDTH = CANVAS_ELEM.clientWidth;
+  const CANVAS_HEIGHT = window.innerHeight;
   const CANVAS_COLOR = p5.color('white');
   const DEFAULT_COLOR = p5.color('black');
   const SELECT_COLOR = p5.color('red');
-  const BUBBLE_MAX_SIZE = CANVAS_SIZE/4;
-  const BUBBLE_MIN_SIZE = CANVAS_SIZE/20;
+  const BUBBLE_MAX_SIZE = CANVAS_WIDTH/4;
+  const BUBBLE_MIN_SIZE = 10; // Barely seen
+  const BUBBLE_INIT_SIZE = 5; // Barely seen
   let delButton = null;
   let bubbleType = null;
   let tempBubble = null;
+  let mouseCanvasPos = {
+    x: 0,
+    y: 0,
+  }
 
   p5.setup = () => {
-    let canvas = p5.createCanvas(CANVAS_SIZE, window.innerHeight);
-    canvas.elt.width = CANVAS_SIZE;
-    canvas.elt.height = window.innerHeight;
-    canvas.elt.style = "";
+    //DEALING WITH PIXEL_RATIO: https://stackoverflow.com/questions/34309228/#34310873
+    let canvas = p5.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    // CANVAS_ELEM.width = CANVAS_WIDTH*PIXEL_RATIO;
+    // CANVAS_ELEM.height = CANVAS_HEIGHT*PIXEL_RATIO;
+    // CANVAS_ELEM.style = `width:${CANVAS_WIDTH}px; height:${CANVAS_HEIGHT}px;`;
+    //CANVAS_ELEM.getContext('2d').scale(PIXEL_RATIO, PIXEL_RATIO);
     canvas.mousePressed(mousePressed);
     canvas.mouseMoved(mouseMoved);
     canvas.mouseReleased(mouseReleased);
@@ -99,29 +108,17 @@ const sociogram_canvas = (p5) => {
   }
 
   let mouseReleased = () => {
-    if(tempBubble) {
+    if(tempBubble && tempBubble.getRadius()*2>BUBBLE_MIN_SIZE) {
       tempBubble.setDrawingAsFinished();
       bubbleType.enable();
     } else {
+      tempBubble = null;
       bubbleType.reset();
     }
   }
 
   let getPointerXY = (pointerEvent) => {
-    let pointerPosition = {x: 0, y: 0};
-    if(pointerEvent.touches) {
-      pointerEvent.preventDefault();
-      let touch = pointerEvent.touches[0];
-      pointerPosition.x = touch.pageX - touch.target.offsetLeft;
-      pointerPosition.y = touch.pageY - touch.target.offsetTop;
-    } else if( pointerEvent.offsetX ) {
-      pointerPosition.x = pointerEvent.offsetX;
-      pointerPosition.y = pointerEvent.offsetY;
-    } else {
-      pointerPosition.x = p5.mouseX;
-      pointerPosition.y = p5.mouseY;
-    }
-    return pointerPosition;
+    return mouseCanvasPos;
   }
 
   let mousePressed = (event) => {
@@ -141,11 +138,13 @@ const sociogram_canvas = (p5) => {
     }
   }
 
-  let mouseMoved = () => {
+  let mouseMoved = (event) => {
+    mouseCanvasPos.x = event.clientX-CANVAS_ELEM.getBoundingClientRect().left;
+    mouseCanvasPos.y = event.clientY-CANVAS_ELEM.getBoundingClientRect().top;
     if (tempBubble && !tempBubble.isDrawingFinished()) {
       let dist = Math.sqrt(
-          Math.pow(tempBubble.getX()-p5.mouseX, 2)+
-          Math.pow(tempBubble.getY()-p5.mouseY, 2)
+          Math.pow(tempBubble.getX()-mouseCanvasPos.x, 2)+
+          Math.pow(tempBubble.getY()-mouseCanvasPos.y, 2)
       )
       tempBubble.setRadius(dist);
     }
@@ -258,7 +257,7 @@ const sociogram_canvas = (p5) => {
       this.y = -100;
       this.icon = p5.loadImage('./img/trash3.svg');
       this.target = null;
-      this.size = BUBBLE_MIN_SIZE/2;
+      this.size = BUBBLE_MIN_SIZE;
     }
 
     draw(bubble_pos) {
@@ -297,7 +296,7 @@ const sociogram_canvas = (p5) => {
     constructor(centerX, centerY) {
       this.x = centerX;
       this.y = centerY;
-      this.w = BUBBLE_MIN_SIZE;
+      this.w = BUBBLE_INIT_SIZE;
       this.temporary = true;
       this.selected = false;
       this.name = null;
@@ -318,7 +317,7 @@ const sociogram_canvas = (p5) => {
       p5.pop();
       if(this.name) {
         p5.textAlign(p5.CENTER, p5.CENTER);
-        p5.textSize(14);
+        p5.textSize(12);
         p5.textStyle(p5.NORMAL);
         p5.text(this.name, this.x, this.y);
       }
