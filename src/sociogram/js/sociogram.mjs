@@ -55,7 +55,7 @@ const sociogram_canvas = (p5) => {
   const CANVAS_COLOR = p5.color('white');
   const DEFAULT_COLOR = p5.color('black');
   const SELECT_COLOR = p5.color('red');
-  const BUBBLE_MAX_SIZE = CANVAS_WIDTH/4;
+  const BUBBLE_MAX_SIZE = Math.max(CANVAS_HEIGHT, CANVAS_WIDTH)/4;
   const BUBBLE_MIN_SIZE = 10; // Barely seen
   const BUBBLE_INIT_SIZE = 5; // Barely seen
   let delButton = null;
@@ -68,11 +68,11 @@ const sociogram_canvas = (p5) => {
 
   p5.setup = () => {
     //DEALING WITH PIXEL_RATIO: https://stackoverflow.com/questions/34309228/#34310873
-    let canvas = p5.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     // CANVAS_ELEM.width = CANVAS_WIDTH*PIXEL_RATIO;
     // CANVAS_ELEM.height = CANVAS_HEIGHT*PIXEL_RATIO;
     // CANVAS_ELEM.style = `width:${CANVAS_WIDTH}px; height:${CANVAS_HEIGHT}px;`;
     //CANVAS_ELEM.getContext('2d').scale(PIXEL_RATIO, PIXEL_RATIO);
+    let canvas = p5.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     canvas.mousePressed(mousePressed);
     canvas.mouseMoved(mouseMoved);
     canvas.mouseReleased(mouseReleased);
@@ -117,12 +117,20 @@ const sociogram_canvas = (p5) => {
     }
   }
 
-  let getPointerXY = (pointerEvent) => {
-    return mouseCanvasPos;
+  let updatePointerXY = (pointerEvent) => {
+    if(pointerEvent.touches) {
+      let touch = pointerEvent.touches[0];
+      mouseCanvasPos.x = touch.pageX - touch.target.offsetLeft;
+      mouseCanvasPos.y = touch.pageY - touch.target.offsetTop;
+    } else {
+      mouseCanvasPos.x = pointerEvent.clientX-CANVAS_ELEM.getBoundingClientRect().left;
+      mouseCanvasPos.y = pointerEvent.clientY-CANVAS_ELEM.getBoundingClientRect().top;
+    }
   }
 
   let mousePressed = (event) => {
-    let pointer = getPointerXY(event);
+    updatePointerXY(event);
+    let pointer = mouseCanvasPos;
     if(delButton.isPointerOver(pointer.x, pointer.y)) {
       delButton.click();
     } else {
@@ -139,8 +147,8 @@ const sociogram_canvas = (p5) => {
   }
 
   let mouseMoved = (event) => {
-    mouseCanvasPos.x = event.clientX-CANVAS_ELEM.getBoundingClientRect().left;
-    mouseCanvasPos.y = event.clientY-CANVAS_ELEM.getBoundingClientRect().top;
+    event.preventDefault();
+    updatePointerXY(event);
     if (tempBubble && !tempBubble.isDrawingFinished()) {
       let dist = Math.sqrt(
           Math.pow(tempBubble.getX()-mouseCanvasPos.x, 2)+
