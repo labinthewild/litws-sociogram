@@ -66,10 +66,10 @@ module.exports = (function(exports) {
 			TEST: 'DATA',
 			canvas_size: {},
 			people: [
-				{x: 281.5, y: 152.234375, radius: 75, label: 'self'},
-				{x: 639.5, y: 354.234375, radius: 67.5, label: 'family'},
-				{x: 278.5, y: 431.234375, radius: 37.5, label: 'friend'},
-				{x: 278.5, y: 431.234375, radius: 27.5, label: 'acquaintance'}
+				{startX: 281.5, startY: 152.234375, radius: 75, label: 'self'},
+				{startX: 639.5, startY: 354.234375, radius: 67.5, label: 'family'},
+				{startX: 278.5, startY: 431.234375, radius: 37.5, label: 'friend'},
+				{startX: 278.5, startY: 431.234375, radius: 27.5, label: 'acquaintance'}
 			]
 		},
 		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
@@ -140,9 +140,9 @@ module.exports = (function(exports) {
 	};
 
 	function configureTimeline() {
-		// timeline.push(config.slides.INTRODUCTION);
-		// timeline.push(config.slides.INFORMED_CONSENT);
-		// timeline.push(config.slides.DEMOGRAPHICS);
+		timeline.push(config.slides.INTRODUCTION);
+		timeline.push(config.slides.INFORMED_CONSENT);
+		timeline.push(config.slides.DEMOGRAPHICS);
 		timeline.push(config.slides.SOCIOGRAM);
 		timeline.push(config.slides.COMMENTS);
 		timeline.push(config.slides.RESULTS);

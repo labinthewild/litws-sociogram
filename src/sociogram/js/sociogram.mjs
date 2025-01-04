@@ -55,6 +55,7 @@ const sociogram_canvas = (p5) => {
   const CANVAS_COLOR = p5.color('white');
   const DEFAULT_COLOR = p5.color('black');
   const SELECT_COLOR = p5.color('red');
+  const SQUARE_COLOR = p5.color('lightgray');
   const BUBBLE_MAX_SIZE = Math.max(CANVAS_HEIGHT, CANVAS_WIDTH)/4;
   const BUBBLE_MIN_SIZE = 10; // Barely seen
   const BUBBLE_INIT_SIZE = 5; // Barely seen
@@ -150,11 +151,7 @@ const sociogram_canvas = (p5) => {
     event.preventDefault();
     updatePointerXY(event);
     if (tempBubble && !tempBubble.isDrawingFinished()) {
-      let dist = Math.sqrt(
-          Math.pow(tempBubble.getX()-mouseCanvasPos.x, 2)+
-          Math.pow(tempBubble.getY()-mouseCanvasPos.y, 2)
-      )
-      tempBubble.setRadius(dist);
+      tempBubble.setEndPoint(mouseCanvasPos.x, mouseCanvasPos.y);
     }
   }
 
@@ -179,12 +176,17 @@ const sociogram_canvas = (p5) => {
     return selected;
   }
 
+  p5.pointsDistance = function (x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  }
+
+  p5.pointBetween = function (x1, y1, x2, y2) {
+    return {x: (x1+x2)/2, y: (y1+y2)/2};
+  }
+
   // SOURCE: https://github.com/bmoren/p5.collide2D
   p5.collidePointCircle = function (x, y, cx, cy, d) {
-    if (this.dist(x, y, cx, cy) <= d / 2) {
-      return true;
-    }
-    return false;
+    return p5.pointsDistance(x, y, cx, cy) <= d / 2;
   };
 
   // SOURCE: https://github.com/bmoren/p5.collide2D
@@ -271,9 +273,10 @@ const sociogram_canvas = (p5) => {
     draw(bubble_pos) {
       if(bubble_pos < bubbles.length || bubble_pos >= 0) {
         let bub = bubbles[bubble_pos];
+        let bub_center = bub.getCenterPoint();
         this.target = bubble_pos;
-        this.x = bub.getX()-this.size/2;
-        this.y = bub.getY()+bub.getRadius()-20;
+        this.x = bub_center.x-this.size/2;
+        this.y = bub_center.y+bub.getRadius()-20;
         p5.push();
         p5.imageMode(p5.CORNER);
         p5.image(this.icon, this.x, this.y, this.size, this.size);
@@ -301,10 +304,11 @@ const sociogram_canvas = (p5) => {
   }
 
   class Bubble {
-    constructor(centerX, centerY) {
-      this.x = centerX;
-      this.y = centerY;
-      this.w = BUBBLE_INIT_SIZE;
+    constructor(startX, startY) {
+      this.startX = startX;
+      this.startY = startY;
+      this.endX = startX+BUBBLE_MIN_SIZE;
+      this.endY = startY+BUBBLE_MIN_SIZE;
       this.temporary = true;
       this.selected = false;
       this.name = null;
@@ -314,20 +318,24 @@ const sociogram_canvas = (p5) => {
     draw(){
       p5.push();
       p5.fill('none');
+      let center = this.getCenterPoint();
+      let radius = this.getRadius();
       if(this.temporary || this.selected){
+        // p5.stroke(SQUARE_COLOR);
+        // p5.square(center.x-radius, center.y-radius, radius*2);
         p5.stroke(SELECT_COLOR);
         p5.strokeWeight(1);
       } else {
         p5.stroke(DEFAULT_COLOR);
         p5.strokeWeight(2);
       }
-      p5.ellipse(this.x, this.y, this.w);
+      p5.ellipse(center.x, center.y, this.getRadius()*2);
       p5.pop();
       if(this.name) {
         p5.textAlign(p5.CENTER, p5.CENTER);
         p5.textSize(12);
         p5.textStyle(p5.NORMAL);
-        p5.text(this.name, this.x, this.y);
+        p5.text(this.name, center.x, center.y);
       }
     }
 
@@ -336,23 +344,28 @@ const sociogram_canvas = (p5) => {
       this.name = bubbleLabel;
     }
 
-    getX() {
-      return this.x;
+    getStartPoint() {
+      return {x: this.startX, y: this.startY};
     }
 
-    getY() {
-      return this.y;
+    getEndPoint() {
+      return {x: this.endX, y: this.endY};
+    }
+
+    getCenterPoint() {
+      return p5.pointBetween(this.startX, this.startY, this.endX, this.endY);
     }
 
     getRadius() {
-      return this.w/2;
+      let center = this.getCenterPoint();
+      let dist_x = Math.abs(center.x - this.startX);
+      let dist_y = Math.abs(center.y - this.startY);
+      return Math.max(dist_x, dist_y);
     }
 
-    setRadius(tentativeLength) {
-      let length = tentativeLength*2;
-      if(length>=BUBBLE_MIN_SIZE && length<=BUBBLE_MAX_SIZE) {
-        this.w = length;
-      }
+    setEndPoint(endX, endY) {
+      this.endX = endX;
+      this.endY = endY;
     }
 
     isDrawingFinished() {
@@ -364,7 +377,8 @@ const sociogram_canvas = (p5) => {
     }
 
     isPointerOver(pointerX, pointerY) {
-      return p5.collidePointCircle(pointerX, pointerY, this.x, this.y, this.w);
+      let center = this.getCenterPoint();
+      return p5.collidePointCircle(pointerX, pointerY, center.x, center.y, this.getRadius()*2);
     }
 
     select() {
@@ -376,16 +390,16 @@ const sociogram_canvas = (p5) => {
     }
 
     deactivate() {
-      this.x = -1000;
-      this.y = -1000;
+      this.startX = -1000;
+      this.startY = -1000;
       this.name = null;
     }
 
     export() {
+      let center = this.getCenterPoint();
       return {
-        x: this.x,
-        y: this.y,
-        radius: this.w/2,
+        center: { x: center.x, y: center.y},
+        radius: this.getRadius(),
         label: this.name
       }
     }
